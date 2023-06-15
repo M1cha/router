@@ -1,0 +1,78 @@
+From c3c934989f7ba10d23805a0fbb3ec05a4ecaace0 Mon Sep 17 00:00:00 2001
+From: Michael Zimmermann <sigmaepsilon92@gmail.com>
+Date: Tue, 13 Jun 2023 07:08:01 +0200
+Subject: [PATCH] HACK: remove UHS property
+
+This is a uboot solution for the following openwrt patch:
+https://github.com/openwrt/openwrt/blob/master/target/linux/rockchip/patches-6.1/105-nanopi-r4s-sd-signalling.patch
+---
+ boot/image-fdt.c | 46 ++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 46 insertions(+)
+
+diff --git a/boot/image-fdt.c b/boot/image-fdt.c
+index e75d051c87..c4c123444e 100644
+--- a/boot/image-fdt.c
++++ b/boot/image-fdt.c
+@@ -602,6 +602,51 @@ __weak int arch_fixup_fdt(void *blob)
+ 	return 0;
+ }
+ 
++static void fdt_fixup_mmc(void *fdt)
++{
++	int j;
++	int prop;
++	const char *path;
++	int offset;
++	int nodeoff;
++	int ret;
++
++	if (fdt_path_offset(fdt, "/aliases") < 0)
++		return;
++
++	/* Cycle through all aliases */
++	for (prop = 0; ; prop++) {
++		const char *name;
++
++		/* FDT might have been edited, recompute the offset */
++		offset = fdt_first_property_offset(fdt,
++			fdt_path_offset(fdt, "/aliases"));
++
++		/* Select property number 'prop' */
++		for (j = 0; j < prop; j++)
++			offset = fdt_next_property_offset(fdt, offset);
++
++		if (offset < 0)
++			break;
++
++		path = fdt_getprop_by_offset(fdt, offset, &name, NULL);
++		if (!strcmp(name, "mmc1")) {
++			nodeoff = fdt_path_offset(fdt, path);
++
++			ret = fdt_nop_property(fdt, nodeoff, "sd-uhs-sdr104");
++			if (ret == 0) {
++				printf("removed UHS property\n");
++			}
++			else if (ret == -FDT_ERR_NOTFOUND) {
++				printf("UHS property not found\n");
++			}
++			else {
++				printf("ERROR: failed to nop UHS property: %d\n", ret);
++			}
++		}
++	}
++}
++
+ int image_setup_libfdt(bootm_headers_t *images, void *blob,
+ 		       int of_size, struct lmb *lmb)
+ {
+@@ -622,6 +667,7 @@ int image_setup_libfdt(bootm_headers_t *images, void *blob,
+ 		printf("ERROR: arch-specific fdt fixup failed\n");
+ 		goto err;
+ 	}
++	fdt_fixup_mmc(blob);
+ 
+ 	fdt_ret = optee_copy_fdt_nodes(blob);
+ 	if (fdt_ret) {
+-- 
+2.40.1
+

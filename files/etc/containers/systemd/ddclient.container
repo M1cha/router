@@ -1,0 +1,19 @@
+[Unit]
+Description=ddclient
+After=network.target
+
+[Container]
+ContainerName=ddclient
+Image=localhost/routerservices:latest
+Label=io.containers.autoupdate=local
+PodmanArgs=--mount type=bind,src=/usr/local/share/container-ddclient.conf,dst=/etc/ddclient.conf,ro,idmap,relabel=shared
+Exec=ddclient -foreground
+Network=host
+UserNS=auto
+
+[Service]
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target default.target

@@ -1,0 +1,30 @@
+[Unit]
+Description=dnsmasq
+After=network.target
+
+[Container]
+ContainerName=dnsmasq
+Image=localhost/routerservices:latest
+Label=io.containers.autoupdate=local
+Network=host
+Volume=/usr/local/share/container-dnsmasq/dnsmasq.d:/etc/dnsmasq.d:ro
+Volume=/usr/local/share/container-dnsmasq/hosts:/etc/dnsmasq-hosts:ro
+Volume=dnsmasq:/media/dnsmasq
+Exec=dnsmasq --no-daemon --conf-dir /etc/dnsmasq.d
+AddCapability=NET_ADMIN
+AddCapability=NET_BIND_SERVICE
+AddCapability=NET_RAW
+
+# ARP doesn't seem to work with user namespaces.
+# So instead, we use a (hopefully) unused user/group in the root namespace.
+# Additionally, we can't use user/group in dnsmasq.conf because those seem
+# unused when using `--no-daemon`.
+User=10000
+Group=10000
+
+[Service]
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target default.target

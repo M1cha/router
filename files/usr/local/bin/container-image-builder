@@ -1,0 +1,19 @@
+#!/bin/bash
+
+set -euo pipefail
+
+tag="localhost/routerservices:latest"
+containerfile="/usr/local/share/container-image-builder/Containerfile.routerservices"
+
+pkgs_old=$(podman run --rm "$tag" apt list --installed || true)
+
+podman build --no-cache --iidfile=/tmp/iid --net=host -f "$containerfile"
+iid_new=$(cat /tmp/iid)
+pkgs_new=$(podman run --rm "$iid_new" apt list --installed)
+
+if [ "$pkgs_old" != "$pkgs_new" ]; then
+	echo "update image"
+	podman tag "$iid_new" "$tag"
+else
+	echo "no update needed"
+fi

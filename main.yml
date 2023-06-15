@@ -1,0 +1,33 @@
+---
+- name: Main
+  hosts: router
+  gather_facts: false
+
+  tasks:
+    - name: "Include secret variables"
+      ansible.builtin.include_vars: "{{ secrets_dir }}/vars.yaml"
+      tags: needs_secrets
+
+    - name: "Subtask: files"
+      ansible.builtin.import_tasks: tasks/files.yml
+      tags: files
+
+    - name: "Subtask: rsync"
+      ansible.builtin.import_tasks: tasks/rsync.yml
+      tags: rsync
+
+    - name: "Subtask: services"
+      ansible.builtin.import_tasks: tasks/services.yml
+      tags: services
+
+  handlers:
+    - name: "Reload nftables"
+      listen: reload_nft
+      ansible.builtin.systemd:
+        name: nftables.service
+        state: restarted
+
+    - name: "Reload system daemon"
+      listen: reload_systemd
+      ansible.builtin.systemd:
+        daemon_reload: true

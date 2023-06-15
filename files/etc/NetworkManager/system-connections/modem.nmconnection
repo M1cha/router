@@ -1,0 +1,17 @@
+[connection]
+id=modem
+uuid=d5e38d2b-c67d-4ede-9003-31e5bacc5075
+type=ethernet
+interface-name=end0
+
+[ethernet]
+
+[ipv4]
+address1=192.168.1.101/24
+method=manual
+
+[ipv6]
+addr-gen-mode=default
+method=disabled
+
+[proxy]

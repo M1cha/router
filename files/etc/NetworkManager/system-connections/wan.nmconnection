@@ -1,0 +1,29 @@
+[connection]
+id=wan
+uuid=9b1cdd97-74b0-40a8-a0b8-16e703c5ccaa
+type=pppoe
+autoconnect-retries=0
+interface-name=ppp0
+timestamp=1686750604
+
+[ethernet]
+
+[ppp]
+lcp-echo-failure=5
+lcp-echo-interval=1
+
+[pppoe]
+parent=end0
+username={{ wan_username }}
+password={{ wan_password }}
+
+[ipv4]
+dns=8.8.8.8;8.8.4.4;
+ignore-auto-dns=true
+method=auto
+
+[ipv6]
+addr-gen-mode=default
+method=auto
+
+[proxy]

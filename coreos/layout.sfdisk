@@ -1,0 +1,12 @@
+label: gpt
+label-id: 00000000-0000-4000-A000-000000000001
+device: fedora-coreos-38.20230514.3.0-metal.aarch64.raw
+unit: sectors
+first-lba: 34
+last-lba: 5625822
+sector-size: 512
+
+fedora-coreos-38.20230514.3.0-metal.aarch64.raw1 : start=        2048, size=       30720, type=8DA63339-0007-60C0-C436-083AC8230908, uuid=6A3AE5A4-E892-4EAD-9009-3A86BF217D4B, name="reserved"
+fedora-coreos-38.20230514.3.0-metal.aarch64.raw2 : start=       32768, size=      260096, type=C12A7328-F81F-11D2-BA4B-00A0C93EC93B, uuid=A94A315C-379C-41AA-ADED-14FC87A4AB38, name="EFI-SYSTEM"
+fedora-coreos-38.20230514.3.0-metal.aarch64.raw3 : start=      292864, size=      786432, type=0FC63DAF-8483-4772-8E79-3D69D8477DE4, uuid=63280AD5-523B-4B54-9ED7-ACF925CCE026, name="boot"
+fedora-coreos-38.20230514.3.0-metal.aarch64.raw4 : start=     1079296, size=     4546527, type=0FC63DAF-8483-4772-8E79-3D69D8477DE4, uuid=93EF07D6-5B86-44A7-A84E-040CF1519D4D, name="root"
