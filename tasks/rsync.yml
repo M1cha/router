@@ -33,6 +33,7 @@
       - "--exclude=container-dnsmasq/hosts"
       - "--exclude=container-dnsmasq/dnsmasq.d/private.conf"
       - "--exclude=container-ddclient.conf"
+      - "--exclude=nftables-vars-private.nft"
 
 # containers
 - name: "rsync: /etc/containers/systemd"

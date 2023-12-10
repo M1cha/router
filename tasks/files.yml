@@ -106,3 +106,10 @@
     dest: /usr/local/share/container-ddclient.conf
     mode: '0600'
   tags: needs_secrets
+
+- name: "nftables variables"
+  ansible.builtin.template:
+    src: "{{ secrets_dir }}/nftables-vars-private.nft"
+    dest: /usr/local/share/nftables-vars-private.nft
+    mode: '0600'
+  tags: needs_secrets

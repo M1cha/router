@@ -89,6 +89,7 @@ ansible-vault create --vault-id main@prompt /path/to/router_secrets/wg_parents.n
 ansible-vault create --vault-id main@prompt /path/to/router_secrets/dnsmasq-hosts
 ansible-vault create --vault-id main@prompt /path/to/router_secrets/dnsmasq-private.conf
 ansible-vault create --vault-id main@prompt /path/to/router_secrets/ddclient.conf
+ansible-vault create --vault-id main@prompt /path/to/router_secrets/nftables-vars-private.nft
 ```
 
 Apply with secrets:
