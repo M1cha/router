@@ -1,10 +1,16 @@
 ---
 
 # Network connections
+- name: "Connection: Bridge"
+  ansible.builtin.copy:
+    src: files/etc/NetworkManager/system-connections/bridge-br0.nmconnection
+    dest: /etc/NetworkManager/system-connections/bridge-br0.nmconnection
+    mode: '0600'
+
 - name: "Connection: LAN"
   ansible.builtin.copy:
-    src: files/etc/NetworkManager/system-connections/lan.nmconnection
-    dest: /etc/NetworkManager/system-connections/lan.nmconnection
+    src: files/etc/NetworkManager/system-connections/bridge-slave-enp1s0.nmconnection
+    dest: /etc/NetworkManager/system-connections/bridge-slave-enp1s0.nmconnection
     mode: '0600'
 
 - name: "Connection: LAN Management"

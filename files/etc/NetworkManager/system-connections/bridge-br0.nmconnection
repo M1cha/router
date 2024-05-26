@@ -1,11 +1,13 @@
 [connection]
-id=lan
-uuid=dd4c80f2-c31d-4392-a9ad-2822990d68e9
-type=ethernet
-interface-name=enp1s0
+id=bridge-br0
+uuid=a287c651-8ef6-4bb6-a21d-1097429338d4
+type=bridge
+interface-name=br0
 
 [ethernet]
-cloned-mac-address=6a:27:19:ac:db:26
+
+[bridge]
+stp=false
 
 [ipv4]
 address1=192.168.43.1/24

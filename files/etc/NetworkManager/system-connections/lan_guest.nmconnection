@@ -9,7 +9,7 @@ timestamp=1686752546
 [vlan]
 flags=1
 id=200
-parent=enp1s0
+parent=br0
 
 [ipv4]
 address1=192.168.46.1/24
