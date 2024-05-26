@@ -17,7 +17,7 @@
     enabled: true
     state: started
 
-- name: "Service: podman-auto-update"
+- name: "Timer: podman-auto-update"
   ansible.builtin.systemd:
     name: container-image-builder.timer
     enabled: true
