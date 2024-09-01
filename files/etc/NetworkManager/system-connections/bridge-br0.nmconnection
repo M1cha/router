@@ -2,7 +2,10 @@
 id=bridge-br0
 uuid=a287c651-8ef6-4bb6-a21d-1097429338d4
 type=bridge
+autoconnect-ports=1
+autoconnect-slaves=1
 interface-name=br0
+timestamp=1717044309
 
 [ethernet]
 
