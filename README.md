@@ -74,7 +74,7 @@ sudo podman run --privileged --rm -v /dev:/dev -v /run/udev:/run/udev -v .:/data
 rpm-ostree install htop iperf3 NetworkManager-ppp pciutils ppp python3 sqm-scripts tcpdump traceroute usbutils
 ```
 
-- htop, iperf3, pciutils, tcpdump, traceroute, usbutils: They're just very useful
+- htop, iperf3, tcpdump, traceroute, usbutils: They're just very useful
 - NetworkManager-ppp, ppp, sqm-scripts: Router stuff
 
 ### Update
