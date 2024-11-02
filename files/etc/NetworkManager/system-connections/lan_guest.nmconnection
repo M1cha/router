@@ -16,8 +16,6 @@ address1=192.168.46.1/24
 method=manual
 
 [ipv6]
-addr-gen-mode=default
-method=manual
-address1=fd59:937a:b8fe:10::1/60
+method=disabled
 
 [proxy]

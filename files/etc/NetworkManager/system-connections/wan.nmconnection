@@ -14,16 +14,21 @@ lcp-echo-interval=1
 
 [pppoe]
 parent=end0
-username={{ wan_username }}
 password={{ wan_password }}
+username={{ wan_username }}
 
 [ipv4]
+dhcp-send-hostname=false
 dns=8.8.8.8;8.8.4.4;
 ignore-auto-dns=true
 method=auto
 
 [ipv6]
-addr-gen-mode=default
+addr-gen-mode=stable-privacy
+dhcp-send-hostname=false
+dns=2001:4860:4860::8888;2001:4860:4860::8844;
+ignore-auto-dns=true
+ip6-privacy=2
 method=auto
 
 [proxy]

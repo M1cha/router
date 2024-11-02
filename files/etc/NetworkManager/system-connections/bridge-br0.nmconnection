@@ -18,8 +18,6 @@ method=manual
 route1=100.64.0.0/16,192.168.43.108
 
 [ipv6]
-addr-gen-mode=default
-method=manual
-address1=fd59:937a:b8fe::1/60
+method=disabled
 
 [proxy]
