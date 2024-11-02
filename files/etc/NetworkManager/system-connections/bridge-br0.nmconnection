@@ -15,6 +15,7 @@ stp=false
 [ipv4]
 address1=192.168.43.1/24
 method=manual
+route1=100.64.0.0/16,192.168.43.108
 
 [ipv6]
 addr-gen-mode=default
