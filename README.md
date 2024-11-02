@@ -76,30 +76,9 @@ rpm-ostree install htop iperf3 NetworkManager-ppp pciutils ppp python3 sqm-scrip
 
 - htop, iperf3, pciutils, tcpdump, traceroute, usbutils: They're just very useful
 - NetworkManager-ppp, ppp, sqm-scripts: Router stuff
-- python3: For ansible
 
-## ansible
-
-Create vault:
+### Update
 
 ```bash
-ansible-vault create --vault-id main@prompt /path/to/router_secrets/vars.yaml
-ansible-vault create --vault-id main@prompt /path/to/router_secrets/wg_main.nmconnection
-ansible-vault create --vault-id main@prompt /path/to/router_secrets/wg_parents.nmconnection
-ansible-vault create --vault-id main@prompt /path/to/router_secrets/dnsmasq-hosts
-ansible-vault create --vault-id main@prompt /path/to/router_secrets/dnsmasq-private.conf
-ansible-vault create --vault-id main@prompt /path/to/router_secrets/ddclient.conf
-ansible-vault create --vault-id main@prompt /path/to/router_secrets/nftables-vars-private.nft
-```
-
-Apply with secrets:
-
-```bash
-ansible-playbook -e secrets_dir=/path/to/router_secrets --vault-id main@prompt main.yml
-```
-
-Apply without secrets:
-
-```bash
-ansible-playbook --skip-tags needs_secrets main.yml
+./update
 ```

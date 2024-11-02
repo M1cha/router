@@ -1,0 +1,57 @@
+#!/usr/bin/env python3
+
+from pathlib import Path, PurePath
+import subprocess
+import re
+import ipaddress
+import io
+
+
+class Target:
+    def __init__(self, userhost):
+        self.userhost = userhost
+        self.tmpdir = PurePath("~/tmp_config")
+
+    def rsync(self, source, target, delete=False):
+        args = ["rsync"]
+
+        if delete:
+            args.append("--delete")
+
+        args.extend(
+            [
+                "--compress",
+                "--recursive",
+                "--times",
+                "--links",
+                "--devices",
+                "--specials",
+                "--executability",
+                f"{source}",
+                f"{self.userhost}:{target}",
+            ],
+        )
+        subprocess.run(args, check=True)
+
+    def run_script(self, file):
+        with open("script.sh", "rb") as f:
+            script = f.read()
+
+        p = subprocess.run(["ssh", self.userhost, script], check=True)
+
+
+def main():
+    target = Target("root@192.168.43.1")
+    source_dir = Path("./config").resolve()
+    source_dir_private = Path("./config-private").resolve()
+
+    target.rsync(f"{source_dir}/", f"{target.tmpdir}/", delete=True)
+    target.rsync(f"{source_dir_private}/", f"{target.tmpdir}/")
+
+    target.run_script("script.sh")
+
+    print("successful")
+
+
+if __name__ == "__main__":
+    main()

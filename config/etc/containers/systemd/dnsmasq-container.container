@@ -7,8 +7,8 @@ ContainerName=dnsmasq
 Image=localhost/routerservices:latest
 Label=io.containers.autoupdate=local
 Network=host
-Volume=/usr/local/share/container-dnsmasq/dnsmasq.d:/etc/dnsmasq.d:ro
-Volume=/usr/local/share/container-dnsmasq/hosts:/etc/dnsmasq-hosts:ro
+Volume=/usr/local/share/dnsmasq/dnsmasq.d:/etc/dnsmasq.d:ro
+Volume=/usr/local/share/dnsmasq/hosts:/etc/dnsmasq-hosts:ro
 Volume=dnsmasq:/media/dnsmasq
 Exec=dnsmasq --no-daemon --conf-dir /etc/dnsmasq.d
 AddCapability=NET_ADMIN
