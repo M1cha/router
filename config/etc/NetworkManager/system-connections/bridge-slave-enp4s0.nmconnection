@@ -1,9 +1,9 @@
 [connection]
-id=bridge-slave-enp1s0
+id=bridge-slave-enp4s0
 uuid=5cc454f3-cdd5-4d46-acc1-3ed3edda16b4
 type=ethernet
 controller=br0
-interface-name=enp1s0
+interface-name=enp4s0
 master=br0
 port-type=bridge
 slave-type=bridge

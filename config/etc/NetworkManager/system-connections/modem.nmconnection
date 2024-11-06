@@ -2,7 +2,7 @@
 id=modem
 uuid=d5e38d2b-c67d-4ede-9003-31e5bacc5075
 type=ethernet
-interface-name=end0
+interface-name=enp5s0
 
 [ethernet]
 
