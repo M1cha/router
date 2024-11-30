@@ -2,16 +2,29 @@
 
 set -euo pipefail
 
-tag="localhost/routerservices:latest"
-containerfile="/usr/local/share/container-image-builder/Containerfile.routerservices"
+name="$1"
+tag="localhost/$name:latest"
+containerfile="/usr/local/share/container-image-builder/Containerfile.$name"
 
-pkgs_old=$(podman run --rm "$tag" apt list --installed || true)
+versions_old=$(podman run --rm --net host "$tag" cat /etc/software-versions || true)
 
-podman build --no-cache --iidfile=/tmp/iid --net=host -f "$containerfile"
-iid_new=$(cat /tmp/iid)
-pkgs_new=$(podman run --rm "$iid_new" apt list --installed)
+versions_latest=$(podman run --rm --net host "$tag" /usr/local/bin/latest-versions || true)
+if [ -n "$versions_latest" ] && [ "$versions_latest" = "$versions_old" ]; then
+	echo "latest-versions already reports: $versions_latest"
+	exit 0
+fi
 
-if [ "$pkgs_old" != "$pkgs_new" ]; then
+podman build \
+	--no-cache \
+	--iidfile="/tmp/iid.$name" \
+	--net=host \
+	-f "$containerfile" \
+	/usr/local/share/container-image-builder
+
+iid_new=$(cat "/tmp/iid.$name")
+versions_new=$(podman run --rm --net host "$iid_new" cat /etc/software-versions)
+
+if [ "$versions_old" != "$versions_new" ]; then
 	echo "update image"
 	podman tag "$iid_new" "$tag"
 else

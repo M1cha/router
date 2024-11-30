@@ -1,0 +1,29 @@
+#!/bin/bash
+
+set -euo pipefail
+
+name="$1"
+
+chcon -R -u system_u -r object_r -t modules_object_t /var/cache/jool-modules
+
+kernel_revision=$(uname -r)
+
+if [ ! -d /sys/module/jool_common ]; then
+	insmod "/var/cache/jool-modules/$kernel_revision/jool_common.ko"
+fi
+if [ ! -d /sys/module/jool ]; then
+	insmod "/var/cache/jool-modules/$kernel_revision/jool.ko"
+fi
+
+hostns() {
+	nsenter -t 1 -n -- "$@"
+}
+
+hostns ip link add "jool_${name}" type veth peer name "jns_${name}"
+hostns ip link set "jns_${name}" netns "$BASHPID"
+ip link set "jns_${name}" name eth0
+
+sysctl -w net.ipv4.conf.all.forwarding=1
+sysctl -w net.ipv6.conf.all.forwarding=1
+sysctl -w net.ipv6.conf.eth0.accept_ra=2
+sysctl -w net.ipv4.ip_local_port_range="32768 32999"

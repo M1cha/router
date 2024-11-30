@@ -1,0 +1,22 @@
+[Unit]
+Description=ppp
+After=netif@%i.service
+BindsTo=netif@%i.service
+Wants=ddclient@ipv4.service jool@internet.service jool@parents.service
+Before=ddclient@ipv4.service jool@internet.service jool@parents.service
+
+[Container]
+ContainerName=ppp-%I
+Image=localhost/ppp:latest
+AutoUpdate=local
+Volume=/usr/local/share/ppp/peers:/etc/ppp/peers:ro,idmap,z
+Exec=pppd call %I nodetach up_sdnotify
+Network=host
+AddCapability=NET_ADMIN,NET_RAW
+Notify=true
+AddDevice=/dev/ppp
+
+[Service]
+Restart=always
+RestartSec=10
+ExecStartPost=sysctl -w net.ipv6.conf.ppp0.accept_ra=2

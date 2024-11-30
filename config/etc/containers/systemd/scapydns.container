@@ -1,0 +1,22 @@
+[Unit]
+Description=scapy DNS server
+After=network.target brvirt.service
+BindsTo=brvirt.service
+
+[Container]
+ContainerName=scapydns
+Image=localhost/scapy:latest
+AutoUpdate=local
+Network=brvirt:host_interface_name=veth_scapydns,mac=14:7d:01:fd:2e:f7
+Volume=/usr/local/share/scapydns:/run/media/config:ro,idmap,z
+UserNS=auto
+Exec=/run/media/config/run
+RunInit=true
+LogDriver=passthrough
+
+[Service]
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

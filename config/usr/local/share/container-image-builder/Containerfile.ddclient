@@ -1,0 +1,5 @@
+FROM docker.io/debian:stable-slim
+
+ARG DEBIAN_FRONTEND=noninteractive
+RUN apt update && apt install -y ca-certificates ddclient
+RUN apt list --installed > /etc/software-versions

@@ -1,0 +1,20 @@
+[Unit]
+Description=jool
+After=network.target jool-modules.service
+Wants=jool-modules.service
+
+[Service]
+PrivateNetwork=yes
+ExecStartPre=/usr/local/share/jool/pre %I
+Restart=always
+RestartSec=10
+
+[Container]
+ContainerName=jool-%I
+Image=localhost/jool:latest
+AutoUpdate=local
+Volume=/usr/local/share/jool:/run/media/config:ro,idmap
+Exec=/run/media/config/entrypoint %I
+Network=host
+RunInit=true
+AddCapability=NET_ADMIN

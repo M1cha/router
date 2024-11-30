@@ -1,0 +1,5 @@
+#!/bin/sh
+
+set -euo pipefail
+
+git ls-remote -q --tags --sort=v:refname https://github.com/opnsense/dhcp6c.git 'refs/tags/v*' | tail -n1

@@ -1,0 +1,17 @@
+[Unit]
+Description=A bridge for virtual systems
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStartPre=-ip link del brvirt
+ExecStart=ip link add brvirt type bridge
+ExecStart=ip route flush dev brvirt
+ExecStart=ip -6 route flush dev brvirt
+ExecStart=ip link set dev brvirt address a2:7d:b5:c5:d8:ac
+ExecStart=ip address add fd33:1491:4cfa:1::1/64 dev brvirt
+ExecStart=ip address add 192.168.40.1/24 dev brvirt
+ExecStart=ip link set up dev brvirt
+ExecStart=ip route add fd33:1491:4cfa:1::/64 dev brvirt
+ExecStartPost=-systemd-run --no-block systemctl try-restart dhcp6c.service
+ExecStop=-ip link del brvirt

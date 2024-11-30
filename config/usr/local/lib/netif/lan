@@ -1,0 +1,31 @@
+#!/bin/bash
+
+set -euo pipefail
+
+start() {
+	echo "started"
+
+	ip link set "$INTERFACE" down
+
+	ip route flush dev "$INTERFACE"
+	ip -6 route flush dev "$INTERFACE"
+	ip address flush dev "$INTERFACE"
+
+	ip address add 192.168.43.1/24 dev "$INTERFACE"
+	ip address add fd33:1491:4cfa::1/64 dev "$INTERFACE"
+
+	# That way, we don't have to give radvd permissions to do that.
+	sysctl "net.ipv6.conf.$INTERFACE.hop_limit=64"
+
+	ip link set "$INTERFACE" up
+	ip route add fd33:1491:4cfa::/64 dev "$INTERFACE"
+	ip route add fd33:1491:4cfa:f069::/64 via fe80::ce28:aaff:fe09:1bbd dev "$INTERFACE"
+	ip route add fd33:1491:4cfa:f000::/64 via fe80::ce28:aaff:fe09:1bbd dev "$INTERFACE"
+}
+
+stop() {
+	echo "stopped"
+	ip link set "$INTERFACE" down || true
+}
+
+"$1"

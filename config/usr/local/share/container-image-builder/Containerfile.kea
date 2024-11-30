@@ -1,0 +1,6 @@
+FROM docker.io/fedora:41
+
+RUN dnf install -y \
+	kea
+
+RUN rpm -qa > /etc/software-versions

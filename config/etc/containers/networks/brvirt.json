@@ -1,0 +1,32 @@
+{
+     "name": "brvirt",
+     "id": "a84d6b78b5947d8050f4296dfc96a20d4392d31f8d24e52ef86efad8cc745c85",
+     "driver": "bridge",
+     "network_interface": "brvirt",
+     "created": "2024-11-15T16:10:00.240468022Z",
+     "subnets": [
+          {
+               "subnet": "192.168.40.0/24",
+               "gateway": "192.168.40.1",
+               "lease_range": {
+                   "start_ip": "192.168.40.100",
+                   "end_ip": "192.168.40.200"
+               }
+          }
+     ],
+     "routes": [
+          {
+               "destination": "0.0.0.0/0",
+               "gateway": "192.168.40.1"
+          }
+     ],
+     "ipv6_enabled": true,
+     "internal": true,
+     "dns_enabled": false,
+     "options": {
+          "mode": "unmanaged"
+     },
+     "ipam_options": {
+          "driver": "host-local"
+     }
+}

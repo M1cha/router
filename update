@@ -8,8 +8,9 @@ import io
 
 
 class Target:
-    def __init__(self, userhost):
-        self.userhost = userhost
+    def __init__(self, user, host):
+        self.user = user
+        self.host = host
         self.tmpdir = PurePath("~/tmp_config")
 
     def rsync(self, source, target, delete=False):
@@ -28,7 +29,7 @@ class Target:
                 "--specials",
                 "--executability",
                 f"{source}",
-                f"{self.userhost}:{target}",
+                f"{self.user}@[{self.host}]:{target}",
             ],
         )
         subprocess.run(args, check=True)
@@ -37,11 +38,11 @@ class Target:
         with open("script.sh", "rb") as f:
             script = f.read()
 
-        p = subprocess.run(["ssh", self.userhost, script], check=True)
+        p = subprocess.run(["ssh", f"{self.user}@{self.host}", script], check=True)
 
 
 def main():
-    target = Target("root@192.168.43.1")
+    target = Target("root", "fe80::a236:9fff:fe8e:846e%eth0")
     source_dir = Path("./config").resolve()
     source_dir_private = Path("./config-private").resolve()
 

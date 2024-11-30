@@ -1,0 +1,21 @@
+[Unit]
+Description=A lan with only internet access
+After=netif@lan.service
+BindsTo=netif@lan.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStartPre=-ip link del lan_inet
+ExecStart=ip link add link lan name lan_inet type vlan id 300
+ExecStart=ip -6 route flush dev lan_inet
+ExecStart=ip address add fd33:1491:4cfa:300::1/64 dev lan_inet
+ExecStart=ip address add 192.168.41.1/24 dev lan_inet
+ExecStart=ip link set up dev lan_inet
+ExecStart=ip route add fd33:1491:4cfa:300::/64 dev lan_inet
+ExecStartPost=-systemd-run --no-block systemctl try-restart dhcp6c.service
+ExecStartPost=-systemd-run --no-block systemctl try-restart kea.service
+ExecStop=-ip link del lan_inet
+
+[Install]
+WantedBy=netif@lan.service

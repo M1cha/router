@@ -1,0 +1,16 @@
+[Unit]
+Description=A lan with only management access
+After=netif@lan.service
+BindsTo=netif@lan.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStartPre=-ip link del lan_mgmt
+ExecStart=ip link add link lan name lan_mgmt type vlan id 100
+ExecStart=ip address add 192.168.42.1/24 dev lan_mgmt
+ExecStart=ip link set up dev lan_mgmt
+ExecStop=-ip link del lan_mgmt
+
+[Install]
+WantedBy=netif@lan.service

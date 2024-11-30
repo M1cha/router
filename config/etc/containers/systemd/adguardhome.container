@@ -1,0 +1,22 @@
+[Unit]
+Description=Network-wide ads & trackers blocking DNS server
+After=network.target brvirt.service named.service
+BindsTo=brvirt.service
+
+[Container]
+ContainerName=adguardhome
+Image=docker.io/adguard/adguardhome:latest
+AutoUpdate=registry
+Network=brvirt:host_interface_name=veth_adguard,mac=c8:31:97:66:78:2b,ip=192.168.40.10
+Volume=/usr/local/share/adguardhome:/run/media/config:ro,z,idmap
+Volume=adguardhome_data:/opt/adguardhome/data:z,idmap
+Secret=adguardhome_admin_password
+UserNS=auto
+Entrypoint=/run/media/config/entrypoint
+
+[Service]
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

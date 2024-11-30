@@ -1,0 +1,29 @@
+#!/bin/bash
+
+set -euo pipefail
+
+source /usr/local/share/jool/config-internet.sh
+ip="$ipv4_prefix.1"
+
+start() {
+	echo "started"
+	ip link set "$INTERFACE" down
+
+	ip route flush dev "$INTERFACE"
+	ip -6 route flush dev "$INTERFACE"
+	ip address flush dev "$INTERFACE"
+
+	ip address add "$ip/24" dev "$INTERFACE"
+	ip address add fe80::1/64 scope link dev "$INTERFACE"
+
+	ip link set "$INTERFACE" up
+
+	ip route add "$ipv6_prefix" via fe80::64 dev "$INTERFACE"
+}
+
+stop() {
+	echo "stopped"
+	ip link set "$INTERFACE" down || true
+}
+
+"$1"

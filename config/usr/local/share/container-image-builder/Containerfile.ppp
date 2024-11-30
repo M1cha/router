@@ -1,0 +1,10 @@
+# Use fedora, because alpines package doesn't have systemd support.
+# For ppp, systemd support is very important, so the service only enters the
+# active state after we have a connection. Otherwise we'd trigger dependent
+# services like dhcp6c too early.
+FROM docker.io/fedora:40
+
+RUN dnf install -y \
+	ppp
+
+RUN rpm -qa > /etc/software-versions

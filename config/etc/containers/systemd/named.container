@@ -1,0 +1,20 @@
+[Unit]
+Description=Berkeley Internet Name Domain (DNS)
+After=network.target brvirt.service scapydns.service
+BindsTo=brvirt.service
+
+[Container]
+ContainerName=named
+Image=docker.io/internetsystemsconsortium/bind9:9.21
+AutoUpdate=registry
+Network=brvirt:host_interface_name=veth_named,mac=b6:18:a5:e5:96:6f
+Volume=/usr/local/share/named:/etc/bind:ro,idmap,z
+UserNS=auto
+Exec=-f -c /etc/bind/named.conf -g -d 3
+
+[Service]
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

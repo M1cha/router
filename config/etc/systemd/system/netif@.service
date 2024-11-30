@@ -1,0 +1,14 @@
+[Unit]
+Description=netif setup
+BindsTo=sys-subsystem-net-devices-%i.device
+After=sys-subsystem-net-devices-%i.device
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+Environment=INTERFACE=%I
+ExecStart=/usr/local/lib/netif/%I start
+ExecStop=/usr/local/lib/netif/%I stop
+
+[Install]
+WantedBy=sys-subsystem-net-devices-%i.device multi-user.target

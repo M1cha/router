@@ -1,0 +1,14 @@
+plugin pppoe.so
+nic-modem
+nopersist
+
+mru 1492
+mtu 1492
+lcp-echo-failure 5
+lcp-echo-interval 1
+
+user {{ wan_username }}
+password {{ wan_password }}
+noauth
+
+defaultroute

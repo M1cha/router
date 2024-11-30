@@ -1,0 +1,33 @@
+#!/bin/bash
+
+set -xeuo pipefail
+
+name="$1"
+
+teardown() {
+	echo "Exit"
+	exit 0
+}
+trap teardown SIGTERM
+
+echo "Init"
+
+source "/run/media/config/config-$name.sh"
+ip_host="$ipv4_prefix.1"
+ip_ns="$ipv4_prefix.2"
+
+ip link set dev lo up
+ip link set dev eth0 up
+ip addr add dev eth0 "$ip_ns"/24
+ip addr add dev eth0 fe80::64
+ip route add default via "$ip_host"
+ip -6 route add default via fe80::1 dev eth0
+
+jool instance add --netfilter --pool6 "$ipv6_prefix"
+jool global update lowest-ipv6-mtu 1500
+jool pool4 add "$ip_ns" 33000-65535 --tcp
+jool pool4 add "$ip_ns" 33000-65535 --udp
+jool pool4 add "$ip_ns" 33000-65535 --icmp
+
+sleep infinity &
+wait

@@ -1,0 +1,284 @@
+#!/usr/bin/env python3
+
+import asyncio
+import sys
+import logging
+import copy
+from scapy.all import *
+
+sys.stdout = sys.stderr
+
+
+class DnsClientProtocol:
+    def __init__(self, query, result):
+        self.query = query
+        self.transport = None
+        self.result = result
+
+    def connection_made(self, transport):
+        # print("client connected")
+        self.transport = transport
+        self.transport.sendto(self.query)
+
+    def datagram_received(self, response, addr):
+        response = DNS(response)
+        # response.show()
+
+        self.result.set_result(response)
+
+    def error_received(self, exc):
+        # print("Error received:", exc)
+        return
+
+    def connection_lost(self, exc):
+        # print("client conn lost")
+        if not self.result.done():
+            self.result.set_result(None)
+
+
+async def forward(query, address):
+    loop = asyncio.get_event_loop()
+    result = loop.create_future()
+
+    transport, protocol = await loop.create_datagram_endpoint(
+        lambda: DnsClientProtocol(bytes(query), result),
+        remote_addr=address,
+    )
+
+    try:
+        return await asyncio.wait_for(result, timeout=5)
+    finally:
+        transport.close()
+
+    return None
+
+
+class DnsServerProtocol:
+    def __init__(self, process_callback):
+        self.process_callback = process_callback
+
+    def connection_made(self, transport):
+        self.transport = transport
+
+    def datagram_received(self, query, address):
+        query = DNS(query)
+        # query.show()
+
+        loop = asyncio.get_event_loop()
+        loop.create_task(self.task(query, address))
+
+    async def task(self, query, address):
+        response = await self.process_callback(query)
+        if response is not None:
+            response.qdcount = len(response.qd)
+            response.ancount = len(response.an)
+            response.nscount = len(response.ns)
+            response.arcount = len(response.ar)
+
+            self.transport.sendto(bytes(response), address)
+
+
+async def start_dns_server(address, process_callback, family=socket.AF_UNSPEC):
+    loop = asyncio.get_running_loop()
+    transport, protocol = await loop.create_datagram_endpoint(
+        lambda: DnsServerProtocol(process_callback), local_addr=address, family=family
+    )
+
+
+def is_domain(s, domain):
+    return s == domain or s.endswith(b"." + domain)
+
+
+def replace_domain(s, needle, replacement):
+    if is_domain(s, needle):
+        s = s.removesuffix(needle) + replacement
+    return s
+
+
+def for_every_name(packet, callback):
+    for qd in packet.qd:
+        if isinstance(qd, DNSQR):
+            qd.qname = callback(qd.qname)
+
+    for an in packet.an:
+        if isinstance(an, DNSRR):
+            an.rrname = callback(an.rrname)
+
+    for ns in packet.ns:
+        if isinstance(ns, DNSRRSOA):
+            ns.rrname = callback(ns.rrname)
+            ns.mname = callback(ns.mname)
+            ns.rname = callback(ns.rname)
+        elif isinstance(ns, DNSRR):
+            ns.rrname = callback(ns.rrname)
+            if isinstance(ns.rdata, bytes):
+                ns.rdata = callback(ns.rdata)
+
+    for ar in packet.ar:
+        if isinstance(ar, DNSRR):
+            ar.rrname = callback(ar.rrname)
+
+
+async def resolve(query, type, domain, server):
+    query = copy.deepcopy(query)
+
+    qr = query[DNSQR]
+    qr.qtype = qr.get_field("qtype").s2i[type]
+    qr.qname = domain
+
+    return await forward(query, server)
+
+
+def replace_nameserver_domain(response, needle, replacement):
+    for ns in response.ns:
+        if isinstance(ns, DNSRR):
+            if ns.rdata == needle:
+                ns.rdata = replacement
+
+    for ar in response.ar:
+        if isinstance(ar, DNSRR):
+            if ar.rrname == needle:
+                ar.rrname = replacement
+
+
+def patch_nameserver_addresses(response, ip):
+    ar_filtered = []
+    for ar in response.ar:
+        if isinstance(ar, DNSRR) and dnstypes[ar.type] == "A":
+            ar.type = ar.get_field("type").s2i["AAAA"]
+            ar.rdata = ip.decode()
+            ar_filtered.append(ar)
+        # Remove records which clients can't reach anyway.
+        elif isinstance(ar, DNSRR) and dnstypes[ar.type] == "AAAA":
+            pass
+        else:
+            ar_filtered.append(ar)
+    response.ar = ar_filtered
+
+
+# NOTE: This barely works and needs a rewrite.
+async def process_dns_query(query):
+    parents_domain = b"parents.home.arpa."
+    server_parents = ("64:ff9b:1::192.168.178.1", 53)
+    our_ip = b"fd33:1491:4cfa:1:167d:1ff:fefd:2ef7"
+
+    qr = query[DNSQR]
+    if is_domain(qr.qname, parents_domain):
+        was_a = dnstypes[qr.qtype] == "A"
+        if was_a:
+            response = await resolve(
+                query, "AAAA", "restic-backup-2.fritz.box.", server_parents
+            )
+
+            response.qd = query.qd
+            response.ns[0].rrname = qr.qname
+            response.ns[0].mname = b"ns1.fritz.box."
+
+            for_every_name(
+                response, lambda s: replace_domain(s, b"fritz.box.", parents_domain)
+            )
+
+            return response
+
+        if qr.qname == b"ns1.parents.home.arpa.":
+            if dnstypes[qr.qtype] == "AAAA":
+                response = await resolve(query, "AAAA", b"fritz.box.", server_parents)
+                replace_nameserver_domain(response, b"fritz.box.", b"ns1.fritz.box.")
+                patch_nameserver_addresses(response, our_ip)
+
+                response.qd = query.qd
+                response.an = [response.an[0]]
+                response.an[0].rrname = b"ns1.fritz.box"
+                response.an[0].rdata = our_ip.decode()
+                response.ns[0].rrname = b"ns1.fritz.box"
+
+                for_every_name(
+                    response, lambda s: replace_domain(s, b"fritz.box.", parents_domain)
+                )
+
+                return response
+            elif dnstypes[qr.qtype] == "A":
+                response = await resolve(
+                    query, "AAAA", "restic-backup-2.fritz.box.", server_parents
+                )
+
+                response.qd = query.qd
+                response.ns[0].rrname = b"ns1.fritz.box."
+                response.ns[0].mname = b"ns1.fritz.box."
+
+                for_every_name(
+                    response, lambda s: replace_domain(s, b"fritz.box.", parents_domain)
+                )
+
+                return response
+
+        # DNS64
+        if dnstypes[qr.qtype] == "AAAA":
+            qr.qtype = qr.get_field("qtype").s2i["A"]
+
+        for_every_name(
+            query, lambda s: replace_domain(s, parents_domain, b"fritz.box.")
+        )
+
+        response = await forward(query, server_parents)
+
+        for qd in response.qd:
+            if isinstance(qd, DNSQR) and dnstypes[qd.qtype] == "A":
+                qd.qtype = qd.get_field("qtype").s2i["AAAA"]
+
+        for an in response.an:
+            if isinstance(an, DNSRR) and dnstypes[an.type] == "A":
+                an.type = an.get_field("type").s2i["AAAA"]
+                an.rdata = "64:ff9b:1::" + an.rdata
+
+        ar_filtered = []
+        for ar in response.ar:
+            if isinstance(ar, DNSRR) and dnstypes[ar.type] == "A":
+                ar.type = ar.get_field("type").s2i["AAAA"]
+
+                if ar.rrname == b"fritz.box.":
+                    ar.rrname = b"ns1.fritz.box."
+                    ar.rdata = our_ip.decode()
+                else:
+                    ar.rdata = "64:ff9b:1::" + ar.rdata
+
+                ar_filtered.append(ar)
+            # Remove records which clients can't reach anyway.
+            elif isinstance(ar, DNSRR) and dnstypes[ar.type] == "AAAA":
+                pass
+            else:
+                ar_filtered.append(ar)
+        response.ar = ar_filtered
+
+        for ns in response.ns:
+            if isinstance(ns, DNSRR):
+                if ns.rdata == b"fritz.box.":
+                    ns.rdata = "ns1.fritz.box."
+
+        # Give empty response to A requests. We still did the request, so the
+        # other fields are populated properly.
+        if was_a:
+            response.qd = query.qd
+            response.an = []
+            response.ar = []
+
+        for_every_name(
+            response, lambda s: replace_domain(s, b"fritz.box.", parents_domain)
+        )
+
+        return response
+
+    return await forward(query, server_parents)
+
+
+async def main():
+    server = await start_dns_server(
+        ("::", 53), process_dns_query, family=socket.AF_INET6
+    )
+
+    loop = asyncio.get_running_loop()
+    await loop.create_future()
+
+
+logging.basicConfig(level=logging.DEBUG)
+asyncio.run(main())

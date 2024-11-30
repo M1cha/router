@@ -1,0 +1,2 @@
+ACTION=="add", SUBSYSTEM=="net", NAME=="enp4s0", NAME="lan"
+ACTION=="add", SUBSYSTEM=="net", NAME=="enp5s0", NAME="modem"

@@ -1,0 +1,23 @@
+#!/bin/sh
+
+set -euo pipefail
+
+export PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+
+if [ -z "${PDINFO:-}" ]; then
+    exit 0
+fi
+
+echo "$PDINFO"
+
+prefix=$(echo "$PDINFO" | cut -d' ' -f1)
+prefix_public=$(ipcalc -j -S 64 "$prefix" | jq -r '.SPLITNETWORK[10]')
+
+nft -f - <<EOF
+flush chain inet router translate_wg0_prefix
+table inet router {
+    chain translate_wg0_prefix {
+        ip6 saddr fd33:1491:4cfa:1000::/64 snat ip6 prefix to $prefix_public
+    }
+}
+EOF

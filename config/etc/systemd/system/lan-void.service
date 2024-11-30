@@ -1,0 +1,20 @@
+[Unit]
+Description=A lan with only network access
+After=netif@lan.service
+BindsTo=netif@lan.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStartPre=-ip link del lan_void
+ExecStart=ip link add link lan name lan_void type vlan id 200
+ExecStart=ip -6 route flush dev lan_void
+ExecStart=ip address add fd33:1491:4cfa:200::1/64 dev lan_void
+ExecStart=ip address add 192.168.46.1/24 dev lan_void
+ExecStart=ip link set up dev lan_void
+ExecStart=ip route add fd33:1491:4cfa:200::/64 dev lan_void
+ExecStartPost=-systemd-run --no-block systemctl try-restart kea.service
+ExecStop=-ip link del lan_void
+
+[Install]
+WantedBy=netif@lan.service

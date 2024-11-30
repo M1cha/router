@@ -1,0 +1,24 @@
+[Unit]
+Description=dhcp6c
+After=network.target ppp@modem.service brvirt.service netif@lan.service lan-inet.service lan-inet_vpn0.service
+BindsTo=ppp@modem.service
+Wants=ddclient@ipv6.service
+Before=ddclient@ipv6.service
+
+[Container]
+ContainerName=dhcp6c
+Image=localhost/dhcp6c:latest
+AutoUpdate=local
+Volume=dhcp6c-db:/var/db:idmap,z
+Volume=/usr/local/share/dhcp6c/dhcp6c.conf:/usr/local/etc/dhcp6c.conf:ro,idmap,z
+Volume=/usr/local/share/dhcp6c:/run/media/config:ro,idmap,z
+Exec=dhcp6c -d -f -n
+Network=host
+AddCapability=NET_ADMIN
+
+[Service]
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target ppp@modem.service

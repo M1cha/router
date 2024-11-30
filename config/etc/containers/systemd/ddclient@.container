@@ -1,0 +1,16 @@
+[Unit]
+Description=ddclient
+After=network.target
+
+[Container]
+ContainerName=ddclient-%I
+Image=localhost/ddclient:latest
+Label=io.containers.autoupdate=local
+Volume=/usr/local/share/ddclient/ddclient-%I.conf:/etc/ddclient.conf:ro,idmap,z
+Exec=ddclient -foreground
+Network=host
+UserNS=auto
+
+[Service]
+Restart=always
+RestartSec=10

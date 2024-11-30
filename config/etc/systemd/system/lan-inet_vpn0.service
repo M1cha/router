@@ -1,0 +1,21 @@
+[Unit]
+Description=A lan access to the internet and vpn0
+After=netif@lan.service
+BindsTo=netif@lan.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStartPre=-ip link del lan_inet_vpn0
+ExecStart=ip link add link lan name lan_inet_vpn0 type vlan id 400
+ExecStart=ip -6 route flush dev lan_inet_vpn0
+ExecStart=ip address add fd33:1491:4cfa:400::1/64 dev lan_inet_vpn0
+ExecStart=ip address add 192.168.31.1/24 dev lan_inet_vpn0
+ExecStart=ip link set up dev lan_inet_vpn0
+ExecStart=ip route add fd33:1491:4cfa:400::/64 dev lan_inet_vpn0
+ExecStartPost=-systemd-run --no-block systemctl try-restart dhcp6c.service
+ExecStartPost=-systemd-run --no-block systemctl try-restart kea.service
+ExecStop=-ip link del lan_inet_vpn0
+
+[Install]
+WantedBy=netif@lan.service
