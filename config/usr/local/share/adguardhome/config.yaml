@@ -61,7 +61,8 @@ dns:
   upstream_timeout: 10s
   private_networks: []
   use_private_ptr_resolvers: true
-  local_ptr_upstreams: []
+  local_ptr_upstreams:
+    - fd33:1491:4cfa:1:b418:a5ff:fee5:966f
   use_dns64: false
   dns64_prefixes: []
   serve_http3: false
