@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -euo pipefail
+set -xeuo pipefail
 
 source /usr/local/share/jool/config-parents.sh
 ip="$ipv4_prefix.1"
