@@ -7,7 +7,7 @@ BindsTo=brvirt.service
 ContainerName=named
 Image=docker.io/internetsystemsconsortium/bind9:9.21
 AutoUpdate=registry
-Network=brvirt:host_interface_name=veth_named,mac=b6:18:a5:e5:96:6f
+Network=brvirt:host_interface_name=veth_named,mac=b6:18:a5:e5:96:6f,ip=192.168.40.11
 Volume=/usr/local/share/named:/etc/bind:ro,idmap,z
 UserNS=auto
 Exec=-f -c /etc/bind/named.conf -g -d 3
