@@ -2,32 +2,67 @@
 
 set -euo pipefail
 
-name="$1"
-tag="localhost/$name:latest"
-containerfile="/usr/local/share/container-image-builder/Containerfile.$name"
+log() {
+	echo "====>" "$@" >&2
+}
 
-versions_old=$(podman run --rm --net host "$tag" cat /etc/software-versions || true)
+update_image() {
+	local name="$1"
+	local tag="localhost/$name:latest"
+	local containerfile="/usr/local/share/container-image-builder/Containerfile.$name"
 
-versions_latest=$(podman run --rm --net host "$tag" /usr/local/bin/latest-versions || true)
-if [ -n "$versions_latest" ] && [ "$versions_latest" = "$versions_old" ]; then
-	echo "latest-versions already reports: $versions_latest"
-	exit 0
-fi
+	local versions_old
+	versions_old=$(podman run --rm --net host "$tag" cat /etc/software-versions || true)
 
-podman build \
-	--no-cache \
-	--pull=always \
-	--iidfile="/tmp/iid.$name" \
-	--net=host \
-	-f "$containerfile" \
-	/usr/local/share/container-image-builder
+	local versions_latest
+	versions_latest=$(podman run --rm --net host "$tag" /usr/local/bin/latest-versions || true)
+	if [ -n "$versions_latest" ] && [ "$versions_latest" = "$versions_old" ]; then
+		log "latest-versions already reports: $versions_latest"
+		return 0
+	fi
 
-iid_new=$(cat "/tmp/iid.$name")
-versions_new=$(podman run --rm --net host "$iid_new" cat /etc/software-versions)
+	if ! podman build \
+		--no-cache \
+		--pull=always \
+		--iidfile="/tmp/iid.$name" \
+		--net=host \
+		-f "$containerfile" \
+		/usr/local/share/container-image-builder; then
+		return 1
+	fi
 
-if [ "$versions_old" != "$versions_new" ]; then
-	echo "update image"
-	podman tag "$iid_new" "$tag"
-else
-	echo "no update needed"
+	local iid_new
+	iid_new=$(cat "/tmp/iid.$name")
+
+	local versions_new
+	versions_new=$(podman run --rm --net host "$iid_new" cat /etc/software-versions)
+
+	if [ "$versions_old" != "$versions_new" ]; then
+		log "update image"
+		podman tag "$iid_new" "$tag"
+	else
+		log "no update needed"
+	fi
+
+	return 0
+}
+
+failed=0
+
+find /usr/local/share/container-image-builder -name 'Containerfile.*' -mindepth 1 -maxdepth 1 -print0 |
+while IFS= read -rd '' path; do
+	filename=$(basename "$path")
+	extension="${filename##*.}"
+
+	log "Build $extension"
+
+	if ! update_image "$extension"; then
+		log "failed to build $extension"
+		failed=1
+	fi
+done
+
+if [ $failed -ne 0 ]; then
+	log "some containers failed to update"
+	exit 1
 fi

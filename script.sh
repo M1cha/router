@@ -116,17 +116,11 @@ install() {
 		systemctl reload nftables.service
 
 		systemctl enable --now \
+			container-image-builder.timer \
 			podman-auto-update.timer \
 			sqm@ppp0.service \
 			wg-quick@wg0.service \
 			wg-quick@wg1.service
-
-		find /usr/local/share/container-image-builder -name 'Containerfile.*' -mindepth 1 -maxdepth 1 -print0 |
-		while IFS= read -rd '' path; do
-			filename=$(basename "$path")
-			extension="${filename##*.}"
-			systemctl enable --now "container-image-builder@${extension}.timer"
-		done
 	fi
 }
 
