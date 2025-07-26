@@ -4,7 +4,15 @@ set -xeuo pipefail
 
 start() {
 	echo "started"
+
+	ip link set "$INTERFACE" down
+
+	ip route flush dev "$INTERFACE"
+	ip -6 route flush dev "$INTERFACE"
+	ip address flush dev "$INTERFACE"
+
 	ip address add 192.168.1.101/24 dev "$INTERFACE"
+
 	ip link set "$INTERFACE" up
 }
 
