@@ -12,6 +12,7 @@ start() {
 	ip address flush dev "$INTERFACE"
 
 	ip address add 192.168.1.101/24 dev "$INTERFACE"
+	ip link set dev "$INTERFACE" mtu 1508
 
 	ip link set "$INTERFACE" up
 }
