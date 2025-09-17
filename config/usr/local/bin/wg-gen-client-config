@@ -1,0 +1,70 @@
+#!/bin/bash
+
+set -euo pipefail
+shopt -s extglob
+export LC_ALL=C
+
+ROUTER_PUBLIC_KEY=""
+ROUTER_LISTEN_PORT=""
+
+# Source: https://github.com/WireGuard/wireguard-tools/blob/v1.0.20250521/src/wg-quick/linux.bash
+parse_options() {
+	local interface_section=0 line key value stripped v
+	CONFIG_FILE="$1"
+	PEER_NAME="$2"
+
+	[[ $CONFIG_FILE =~ ^[a-zA-Z0-9_=+.-]{1,15}$ ]] && CONFIG_FILE="/etc/wireguard/$CONFIG_FILE.conf"
+	[[ -e $CONFIG_FILE ]] || die "\`$CONFIG_FILE' does not exist"
+	[[ $CONFIG_FILE =~ (^|/)([a-zA-Z0-9_=+.-]{1,15})\.conf$ ]] || die "The config file must be a valid interface name, followed by .conf"
+	CONFIG_FILE="$(readlink -f "$CONFIG_FILE")"
+	((($(stat -c '0%#a' "$CONFIG_FILE") & $(stat -c '0%#a' "${CONFIG_FILE%/*}") & 0007) == 0)) || echo "Warning: \`$CONFIG_FILE' is world accessible" >&2
+
+	shopt -s nocasematch
+	while read -r line || [[ -n $line ]]; do
+		stripped="${line%%\#*}"
+		key="${stripped%%=*}"; key="${key##*([[:space:]])}"; key="${key%%*([[:space:]])}"
+		value="${stripped#*=}"; value="${value##*([[:space:]])}"; value="${value%%*([[:space:]])}"
+
+		if [[ $key == "["* ]]; then
+			interface_section=0
+			peer_section=0
+		fi
+		[[ $key == "[Interface]" ]] && interface_section=1
+		if [[ $key == "[Peer]" ]]; then
+			peer_section=1
+			peer_name="${previous_line#*# }"
+		fi
+
+		if [[ $interface_section -eq 1 ]]; then
+			case "$key" in
+			ListenPort)
+				ROUTER_LISTEN_PORT="$value"
+				ROUTER_LISTEN_ADDRESS="${previous_line#*# }"
+				continue ;;
+			PrivateKey) ROUTER_PUBLIC_KEY=$(wg pubkey <<< "$value"); continue ;;
+			esac
+		fi
+		if [[ $peer_section -eq 1 ]] && [[ $peer_name == "$PEER_NAME" ]]; then
+			case "$key" in
+			AllowedIPs) PEER_ALLOWED_IPS="$value"; continue ;;
+			PresharedKey) PEER_PSK="$value"; continue ;;
+			esac
+		fi
+		previous_line="$line"
+	done < "$CONFIG_FILE"
+	shopt -u nocasematch
+}
+
+parse_options "$1" "$2"
+
+echo "[Interface]"
+echo "Address = $PEER_ALLOWED_IPS"
+echo "DNS = fd33:1491:4cfa:1:b418:a5ff:fee5:966f"
+echo "PrivateKey = AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+echo
+echo "[Peer]"
+echo "AllowedIPs = 0.0.0.0/0, ::/0"
+echo "Endpoint = $ROUTER_LISTEN_ADDRESS:$ROUTER_LISTEN_PORT"
+echo "PreSharedKey = $PEER_PSK"
+echo "PublicKey = $ROUTER_PUBLIC_KEY"
+
