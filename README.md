@@ -33,10 +33,11 @@ virt-install \
 ### Install additional packages
 
 ```bash
-rpm-ostree install htop iperf3 sqm-scripts tcpdump traceroute usbutils
+rpm-ostree install htop iperf3 node-exporter sqm-scripts tcpdump traceroute usbutils
 ```
 
 - htop, iperf3, tcpdump, traceroute, usbutils: They're just very useful
+- node-exporter: for recording system information
 - sqm-scripts: Router stuff
 
 ### Update

@@ -118,6 +118,7 @@ install() {
 		systemctl enable --now \
 			container-image-builder.timer \
 			podman-auto-update.timer \
+			prometheus-node-exporter.service \
 			sqm@ppp0.service \
 			wg-quick@wg0.service \
 			wg-quick@wg1.service
