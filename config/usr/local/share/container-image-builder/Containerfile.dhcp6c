@@ -1,7 +1,7 @@
 # There doesn't seem to be any distro with a pre-built package of dhcp6c, so we
 # have to do that ourselves.
 
-FROM docker.io/alpine:3.20 AS builder
+FROM docker.io/alpine:3.22 AS builder
 
 RUN apk add --no-cache \
 	bash \
@@ -20,7 +20,7 @@ RUN cd /opt/dhcp6c-src && patch -p1 < /opt/builder/dhcp6c/0002-Fix-build-on-alpi
 RUN cd /opt/dhcp6c-src && LIBS='-lbsd' ./configure && make -j1
 
 
-FROM docker.io/alpine:3.20
+FROM docker.io/alpine:3.22
 
 COPY --from=builder /opt/dhcp6c-src/dhcp6c /usr/local/bin/
 COPY --from=builder /etc/software-versions /etc/
