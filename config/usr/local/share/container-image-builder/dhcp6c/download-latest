@@ -2,11 +2,10 @@
 
 set -euo pipefail
 
-latest_raw=$(/opt/builder/dhcp6c/latest-versions)
+latest_raw=$(git ls-remote -q --tags --sort=v:refname https://github.com/opnsense/dhcp6c.git 'refs/tags/v*' | tail -n1)
 latest=$(awk '{ print $2 }' <<< "$latest_raw" | xargs)
 latest=${latest#"refs/tags/"}
 latest=${latest%"^{}"}
 
 git clone https://github.com/opnsense/dhcp6c.git -b "$latest" /opt/dhcp6c-src
 
-cat <<< "$latest_raw" > /etc/software-versions

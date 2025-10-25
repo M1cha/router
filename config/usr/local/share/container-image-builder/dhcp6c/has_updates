@@ -1,0 +1,20 @@
+#!/bin/sh
+
+set -euo pipefail
+
+source ../common/has_updates-alpine
+
+dhcp6c_version_latest=$( \
+	git ls-remote -q --tags --sort=v:refname https://github.com/opnsense/dhcp6c.git 'refs/tags/v*' \
+	| tail -n1 \
+	| awk '{ print $1 }' \
+	| xargs \
+)
+dhcp6c_version_installed=$(cat /etc/dhcp6c_version || true)
+if [ "$dhcp6c_version_latest" != "$dhcp6c_version_installed" ]; then
+	echo "dhcp6c can be updated from $dhcp6c_version_installed to $dhcp6c_version_latest" >&2
+	echo "1"
+	exit 0
+fi
+
+echo "0"

@@ -4,7 +4,6 @@
 # services like dhcp6c too early.
 FROM docker.io/fedora:42
 
+RUN dnf update -y
 RUN dnf install -y \
 	ppp
-
-RUN rpm -qa > /etc/software-versions

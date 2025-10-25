@@ -1,6 +1,5 @@
 FROM docker.io/alpine:edge
 
+RUN apk upgrade --no-cache
 RUN apk add --no-cache \
 	scapy
-
-RUN apk list --installed > /etc/software-versions

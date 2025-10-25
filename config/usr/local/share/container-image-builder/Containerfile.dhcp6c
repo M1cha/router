@@ -3,6 +3,7 @@
 
 FROM docker.io/alpine:3.22 AS builder
 
+RUN apk upgrade --no-cache
 RUN apk add --no-cache \
 	bash \
 	bison \
@@ -18,18 +19,18 @@ RUN /opt/builder/dhcp6c/download-latest
 RUN cd /opt/dhcp6c-src && patch -p1 < /opt/builder/dhcp6c/0001-Fix-building-on-Linux.patch
 RUN cd /opt/dhcp6c-src && patch -p1 < /opt/builder/dhcp6c/0002-Fix-build-on-alpine-Linux.patch
 RUN cd /opt/dhcp6c-src && LIBS='-lbsd' ./configure && make -j1
+RUN git -C /opt/dhcp6c-src rev-parse HEAD > /etc/dhcp6c_version
 
 
 FROM docker.io/alpine:3.22
 
 COPY --from=builder /opt/dhcp6c-src/dhcp6c /usr/local/bin/
-COPY --from=builder /etc/software-versions /etc/
+COPY --from=builder /etc/dhcp6c_version /etc/
 
+RUN apk upgrade --no-cache
 RUN apk add --no-cache \
 	git \
 	ipcalc \
 	jq \
 	libbsd \
 	nftables
-
-COPY dhcp6c/latest-versions /usr/local/bin/

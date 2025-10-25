@@ -3,6 +3,7 @@
 
 FROM docker.io/alpine:3.22 AS builder
 
+RUN apk upgrade --no-cache
 RUN apk add --no-cache \
 	automake \
 	autoconf \
@@ -17,13 +18,13 @@ COPY . /opt/builder
 RUN /opt/builder/radvd/download-latest
 
 RUN cd /opt/radvd-src && ./autogen.sh && ./configure && make -j1
+RUN git -C /opt/radvd-src rev-parse HEAD > /etc/radvd_version
 
 FROM docker.io/alpine:3.22
 
 COPY --from=builder /opt/radvd-src/radvd /usr/local/bin/
-COPY --from=builder /etc/software-versions /etc/
+COPY --from=builder /etc/radvd_version /etc/
 
+RUN apk upgrade --no-cache
 RUN apk add --no-cache \
 	git
-
-COPY radvd/latest-versions /usr/local/bin/

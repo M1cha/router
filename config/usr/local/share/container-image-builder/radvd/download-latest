@@ -3,4 +3,3 @@
 set -euo pipefail
 
 git clone https://github.com/radvd-project/radvd.git -b master /opt/radvd-src
-git -C /opt/radvd-src rev-parse HEAD > /etc/software-versions
