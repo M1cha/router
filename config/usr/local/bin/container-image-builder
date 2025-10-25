@@ -49,7 +49,6 @@ update_image() {
 
 failed=0
 
-find /usr/local/share/container-image-builder -name 'Containerfile.*' -mindepth 1 -maxdepth 1 -print0 |
 while IFS= read -rd '' path; do
 	filename=$(basename "$path")
 	extension="${filename##*.}"
@@ -60,7 +59,7 @@ while IFS= read -rd '' path; do
 		log "failed to build $extension"
 		failed=1
 	fi
-done
+done < <(find /usr/local/share/container-image-builder -name 'Containerfile.*' -mindepth 1 -maxdepth 1 -print0)
 
 if [ $failed -ne 0 ]; then
 	log "some containers failed to update"
