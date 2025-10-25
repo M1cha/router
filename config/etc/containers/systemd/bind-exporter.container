@@ -1,0 +1,19 @@
+[Unit]
+Description=Prometheus exporter for BIND
+After=network.target brvirt.service named.service
+BindsTo=brvirt.service
+
+[Container]
+ContainerName=bind-exporter
+Image=docker.io/prometheuscommunity/bind-exporter:v0.8.0
+AutoUpdate=registry
+Network=brvirt:host_interface_name=veth_bindex,mac=b6:18:a5:e5:96:70
+UserNS=auto
+Exec=--bind.stats-url http://[fd33:1491:4cfa:1:b418:a5ff:fee5:966f]:8053
+
+[Service]
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
