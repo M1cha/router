@@ -40,6 +40,14 @@ rpm-ostree install htop iperf3 node-exporter sqm-scripts tcpdump traceroute usbu
 - node-exporter: for recording system information
 - sqm-scripts: Router stuff
 
+### Trust my own CA
+
+The gotify client needs this.
+
+```bash
+update-ca-trust
+```
+
 ### Update
 
 ```bash

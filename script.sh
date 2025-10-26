@@ -88,6 +88,7 @@ install() {
 	tmp2sys etc/udev/rules.d --delete
 	tmp2sys etc/systemd/resolved.conf.d --delete
 	tmp2sys etc/wireguard --delete
+	tmp2sys etc/pki/ca-trust/source/anchors --delete
 	tmp2sys etc/systemd/system
 	tmp2sys usr/local/bin --delete
 	tmp2sys usr/local/lib --delete
