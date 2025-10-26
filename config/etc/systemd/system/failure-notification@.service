@@ -1,0 +1,10 @@
+[Unit]
+Description=Send a notification about a failed systemd unit
+After=network.target
+
+[Service]
+PrivateMounts=yes
+BindReadOnlyPaths=/usr/local/share/resolv-homeserver.conf:/etc/resolv.conf
+BindReadOnlyPaths=/usr/local/share/nsswitch-homeserver.conf:/etc/nsswitch.conf
+Type=simple
+ExecStart=/usr/local/bin/failure-notification "%i"
