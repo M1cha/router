@@ -165,7 +165,7 @@ async def process_dns_query(query):
     server_parents = ("64:ff9b:1::192.168.178.1", 53)
     server_homeserver = ("fd33:1491:4cfa:f000::8000", 53)
     our_ip = b"fd33:1491:4cfa:1:167d:1ff:fefd:2ef7"
-    allowed_ipv4s = Net('10.92.1.0/16')
+    allowed_ipv4s = Net("10.92.1.0/16")
 
     qr = query[DNSQR]
     if is_domain(qr.qname, parents_domain):
@@ -273,18 +273,19 @@ async def process_dns_query(query):
 
         return response
     elif is_domain(qr.qname, homeserver_domain):
-       response = await forward(query, server_homeserver)
+        response = await forward(query, server_homeserver)
 
-       if dnstypes[qr.qtype] == "A":
-           an_filtered = []
+        if dnstypes[qr.qtype] == "A":
+            an_filtered = []
 
-           for an in response.an:
-               if isinstance(an, DNSRR) and an.rdata in allowed_ipv4s:
-                   an_filtered.append(an)
+            for an in response.an:
+                if isinstance(an, DNSRR) and an.rdata in allowed_ipv4s:
+                    an_filtered.append(an)
 
-           response.an = an_filtered
+            response.an = an_filtered
 
-       return response
+        return response
+
 
 def on_sigterm(loop, future):
     print("SIGTERM received")
