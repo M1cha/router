@@ -2,5 +2,5 @@
 
 set -euo pipefail
 
-source ../common/has_updates-fedora
+source ../common/has_updates-alpine
 echo "0"

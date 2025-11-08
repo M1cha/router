@@ -14,7 +14,6 @@ ExecStart=ip address add 192.168.31.1/24 dev lan_inet_vpn0
 ExecStart=ip link set up dev lan_inet_vpn0
 ExecStart=ip route add fd33:1491:4cfa:400::/64 dev lan_inet_vpn0
 ExecStartPost=-systemd-run --no-block systemctl try-restart dhcp6c.service
-ExecStartPost=-systemd-run --no-block systemctl try-restart kea.service
 ExecStop=-ip link del lan_inet_vpn0
 
 [Install]

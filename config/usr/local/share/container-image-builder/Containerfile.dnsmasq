@@ -1,0 +1,5 @@
+FROM docker.io/alpine:edge
+
+RUN apk upgrade --no-cache
+RUN apk add --no-cache \
+	dnsmasq

@@ -1,0 +1,21 @@
+[Unit]
+Description=dnsmasq DHCPv4 Server
+After=network.target netif@lan.service lan-inet.service lan-inet_vpn0.service lan-void.service
+
+[Container]
+ContainerName=router-dnsmasq
+Image=localhost/dnsmasq:latest
+AutoUpdate=local
+Volume=/usr/local/share/dnsmasq/dnsmasq.conf:/etc/dnsmasq.conf:ro,idmap,z
+Exec=/usr/sbin/dnsmasq -k --pid-file --dhcp-leasefile=/var/lib/dnsmasq/dnsmasq.leases
+Volume=dnsmasq_data:/var/lib/dnsmasq:idmap,z
+Network=host
+AddCapability=NET_ADMIN
+AddCapability=NET_RAW
+
+[Service]
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

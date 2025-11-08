@@ -1,5 +1,0 @@
-FROM docker.io/fedora:42
-
-RUN dnf update -y
-RUN dnf install -y \
-	kea
