@@ -19,8 +19,8 @@ start() {
 
 	ip link set "$INTERFACE" up
 	ip route add fd33:1491:4cfa::/64 dev "$INTERFACE"
-	ip route add fd33:1491:4cfa:f069::/64 via fe80::ce28:aaff:fe09:1bbd dev "$INTERFACE"
-	ip route add fd33:1491:4cfa:f000::/64 via fe80::ce28:aaff:fe09:1bbd dev "$INTERFACE"
+	ip route add fd33:1491:4cfa:f069::/64 via fe80::befc:e7ff:fe63:b194 dev "$INTERFACE"
+	ip route add fd33:1491:4cfa:f000::/64 via fe80::befc:e7ff:fe63:b194 dev "$INTERFACE"
 	ip route add 10.92.0.0/16 via 192.168.43.10 dev "$INTERFACE"
 }
 
