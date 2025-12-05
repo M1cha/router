@@ -9,6 +9,7 @@ Before=ddclient@ipv6.service
 ContainerName=dhcp6c
 Image=localhost/dhcp6c:latest
 AutoUpdate=local
+Volume=/run/dhcp6c-addresses:/run/dhcp6c-addresses:idmap,z
 Volume=dhcp6c-db:/var/db:idmap,z
 Volume=/usr/local/share/dhcp6c/dhcp6c.conf:/usr/local/etc/dhcp6c.conf:ro,idmap,z
 Volume=/usr/local/share/dhcp6c:/run/media/config:ro,idmap,z
@@ -19,6 +20,7 @@ AddCapability=NET_ADMIN
 [Service]
 Restart=always
 RestartSec=10
+ExecStartPre=mkdir -p /run/dhcp6c-addresses
 
 [Install]
 WantedBy=multi-user.target ppp@modem.service

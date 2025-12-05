@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 set -euo pipefail
 
@@ -10,8 +10,23 @@ fi
 
 echo "$PDINFO"
 
+# Alpine doesn't have ipv6calc.
+mac_to_eui64() {
+    IFS=: read -r a b c d e f <<< "$1"
+    printf "%02x%02x:%02xff:fe%02x:%02x%02x" \
+        "$((0x$a ^ 2))" "0x$b" "0x$c" "0x$d" "0x$e" "0x$f"
+}
+
 prefix=$(echo "$PDINFO" | cut -d' ' -f1)
 prefix_public=$(ipcalc -j -S 64 "$prefix" | jq -r '.SPLITNETWORK[10]')
+
+prefix_lan_inet=$(ipcalc -j -S 64 "$prefix" | jq -r '.SPLITNETWORK[44]')
+addr_cloudflare_data="${prefix_lan_inet::-5}:$(mac_to_eui64 8e:cc:7e:8a:4e:16)"
+
+nft flush set inet router cloudflare_data
+nft add element inet router cloudflare_data "{ $addr_cloudflare_data }"
+
+echo -n "$addr_cloudflare_data" > /run/dhcp6c-addresses/addr_cloudflare_data
 
 nft -f - <<EOF
 flush chain inet router translate_wg0_prefix
