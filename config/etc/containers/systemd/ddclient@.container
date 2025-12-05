@@ -6,7 +6,7 @@ After=network.target
 ContainerName=ddclient-%I
 Image=localhost/ddclient:latest
 Label=io.containers.autoupdate=local
-Volume=/usr/local/share/ddclient/ddclient-%I.conf:/etc/ddclient.conf:ro,idmap,z
+Volume=/usr/local/share/ddclient/ddclient-%I.conf:/etc/ddclient/ddclient.conf:ro,idmap,z
 Exec=ddclient -foreground
 Network=host
 UserNS=auto

@@ -2,5 +2,5 @@
 
 set -euo pipefail
 
-. ../common/has_updates-apt
+source ../common/has_updates-alpine
 echo "0"
