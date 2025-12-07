@@ -1,0 +1,20 @@
+[Unit]
+Description=A lan for homeserver with only internet access
+After=netif@lan.service
+BindsTo=netif@lan.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStartPre=-ip link del lan_inet_hs
+ExecStart=ip link add link lan name lan_inet_hs type vlan id 500
+ExecStart=ip -6 route flush dev lan_inet_hs
+ExecStart=ip address add fd33:1491:4cfa:500::1/64 dev lan_inet_hs
+ExecStart=ip address add 10.91.128.1/16 dev lan_inet_hs
+ExecStart=ip link set up dev lan_inet_hs
+ExecStart=ip route add fd33:1491:4cfa:500::/64 dev lan_inet_hs
+ExecStartPost=-systemd-run --no-block systemctl try-restart dhcp6c.service
+ExecStop=-ip link del lan_inet_hs
+
+[Install]
+WantedBy=netif@lan.service

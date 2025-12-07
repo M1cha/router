@@ -20,8 +20,8 @@ mac_to_eui64() {
 prefix=$(echo "$PDINFO" | cut -d' ' -f1)
 prefix_public=$(ipcalc -j -S 64 "$prefix" | jq -r '.SPLITNETWORK[10]')
 
-prefix_lan_inet=$(ipcalc -j -S 64 "$prefix" | jq -r '.SPLITNETWORK[44]')
-addr_cloudflare_data="${prefix_lan_inet::-5}:$(mac_to_eui64 8e:cc:7e:8a:4e:16)"
+prefix_lan_inet_hs=$(ipcalc -j -S 64 "$prefix" | jq -r '.SPLITNETWORK[45]')
+addr_cloudflare_data="${prefix_lan_inet_hs::-5}:$(mac_to_eui64 8e:cc:7e:8a:4e:16)"
 
 nft flush set inet router cloudflare_data
 nft add element inet router cloudflare_data "{ $addr_cloudflare_data }"

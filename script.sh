@@ -104,6 +104,7 @@ install() {
 	systemctl mask NetworkManager.service NetworkManager-wait-online.service
 	systemctl enable \
 		lan-inet.service \
+		lan-inet_homeserver.service \
 		lan-void.service \
 		lan-mgmt.service \
 		lan-inet_vpn0.service \
