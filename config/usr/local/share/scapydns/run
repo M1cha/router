@@ -3,6 +3,7 @@
 import asyncio
 import copy
 import functools
+import ipaddress
 import logging
 import signal
 import sys
@@ -167,6 +168,7 @@ async def process_dns_query(query):
     server_homeserver = ("fd33:1491:4cfa:f000::8000", 53)
     our_ip = b"fd33:1491:4cfa:1:167d:1ff:fefd:2ef7"
     allowed_ipv4s = Net("10.92.1.0/16")
+    ula_parents = ipaddress.ip_network("fd65:9a0c:d6e4::/64")
 
     qr = query[DNSQR]
     if is_domain(qr.qname, parents_domain):
@@ -218,40 +220,65 @@ async def process_dns_query(query):
 
                 return response
 
-        # DNS64
-        if dnstypes[qr.qtype] == "AAAA":
-            qr.qtype = qr.get_field("qtype").s2i["A"]
-
         for_every_name(
             query, lambda s: replace_domain(s, parents_domain, b"fritz.box.")
         )
 
-        response = await forward(query, server_parents)
+        # DNS64
+        response = None
+        if dnstypes[qr.qtype] == "AAAA":
+            response_aaaa = await forward(query, server_parents)
+            if response_aaaa is not None and response_aaaa.ancount > 0:
+                response = response_aaaa
+            else:
+                qr.qtype = qr.get_field("qtype").s2i["A"]
+
+        if response is None:
+            response = await forward(query, server_parents)
 
         for qd in response.qd:
             if isinstance(qd, DNSQR) and dnstypes[qd.qtype] == "A":
                 qd.qtype = qd.get_field("qtype").s2i["AAAA"]
 
+        an_filtered = []
         for an in response.an:
             if isinstance(an, DNSRR) and dnstypes[an.type] == "A":
                 an.type = an.get_field("type").s2i["AAAA"]
                 an.rdata = "64:ff9b:1::" + an.rdata
+            elif isinstance(an, DNSRR) and dnstypes[an.type] == "AAAA":
+                if not ipaddress.ip_address(an.rdata) in ula_parents:
+                    continue
+
+            an_filtered.append(an)
+        response.an = an_filtered
 
         ar_filtered = []
+        has_ns1 = False
         for ar in response.ar:
             if isinstance(ar, DNSRR) and dnstypes[ar.type] == "A":
                 ar.type = ar.get_field("type").s2i["AAAA"]
 
                 if ar.rrname == b"fritz.box.":
+                    if has_ns1:
+                        continue
+
                     ar.rrname = b"ns1.fritz.box."
                     ar.rdata = our_ip.decode()
+                    has_ns1 = True
                 else:
                     ar.rdata = "64:ff9b:1::" + ar.rdata
 
                 ar_filtered.append(ar)
             # Remove records which clients can't reach anyway.
             elif isinstance(ar, DNSRR) and dnstypes[ar.type] == "AAAA":
-                pass
+                if ar.rrname == b"fritz.box.":
+                    if has_ns1:
+                        continue
+
+                    ar.rrname = b"ns1.fritz.box."
+                    ar.rdata = our_ip.decode()
+                    has_ns1 = True
+                ar_filtered.append(ar)
             else:
                 ar_filtered.append(ar)
         response.ar = ar_filtered
