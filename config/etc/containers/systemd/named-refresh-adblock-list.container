@@ -1,0 +1,17 @@
+[Unit]
+Description=Refresh adblock list of named
+After=network.target brvirt.service
+BindsTo=brvirt.service
+
+[Service]
+ExecStopPost=-podman exec named rndc reload block
+
+[Container]
+ContainerName=named-refresh-adblock-list
+Image=docker.io/python:3.14-alpine
+AutoUpdate=registry
+Network=brvirt:host_interface_name=veth_namedads
+Volume=/usr/local/share/named-refresh-adblock-list:/run/media/config:ro,idmap,z
+Volume=named-rpz:/run/media/rpz:idmap,z
+UserNS=auto
+Exec=/run/media/config/run

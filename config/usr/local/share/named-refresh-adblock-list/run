@@ -1,0 +1,71 @@
+#!/usr/bin/env python3
+
+import datetime
+import os
+import urllib.request
+
+
+def generate_serial(counter=0):
+    today = datetime.datetime.now(datetime.UTC).strftime("%Y%m%d")
+    return f"{today}{counter:02d}"
+
+
+hostfiles = [
+    "https://raw.githubusercontent.com/StevenBlack/hosts/refs/heads/master/hosts",
+]
+zonefile_header = f"""\
+$TTL 3600       ; Default Time to Live for resource records (1 hour)
+@       IN      SOA     localhost. root.localhost. (
+                        {generate_serial()} ; Serial (format: YYYYMMDDnn)
+                        3600       ; Refresh (1 hour)
+                        900        ; Retry (15 minutes)
+                        1209600    ; Expire (2 weeks)
+                        86400      ; Minimum TTL (1 day)
+                        )
+        IN      NS      localhost.
+
+use-application-dns.net CNAME .
+*.use-application-dns.net CNAME .
+"""
+
+
+def block_domain(zonefile, domain):
+    if "_" in domain:
+        zonefile.write(f"{domain} CNAME .\n")
+    else:
+        zonefile.write(f"{domain} IN A 0.0.0.0\n")
+        zonefile.write(f"{domain} IN AAAA ::\n")
+
+
+def load_hostfile(zonefile, url):
+    with urllib.request.urlopen(url) as response:
+        for line in response.readlines():
+            line = line.split(b"#")[0].strip()
+            if line == b"":
+                continue
+
+            parts = line.split(b" ", 1)
+            address = parts[0].strip().decode()
+            domain = parts[1].strip().decode()
+
+            if address != "0.0.0.0":
+                continue
+            if domain == "0.0.0.0":
+                continue
+
+            block_domain(zonefile, domain)
+            block_domain(zonefile, f"*.{domain}")
+
+
+def main():
+    with open("/run/media/rpz/rpz.db.tmp", "w") as zonefile:
+        zonefile.write(zonefile_header)
+
+        for url in hostfiles:
+            load_hostfile(zonefile, url)
+
+    os.rename("/run/media/rpz/rpz.db.tmp", "/run/media/rpz/rpz.db")
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,6 @@
+#!/bin/sh
+
+set -euo pipefail
+
+rndc-confgen -u bind -a -c /tmp/rndc.key
+exec /usr/sbin/named -u bind -f -c /etc/bind/named.conf -g -d 3

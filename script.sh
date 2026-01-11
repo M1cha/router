@@ -119,6 +119,7 @@ install() {
 
 		systemctl enable --now \
 			container-image-builder.timer \
+			named-refresh-adblock-list.timer \
 			podman-auto-update.timer \
 			prometheus-node-exporter.service \
 			sqm@ppp0.service \
