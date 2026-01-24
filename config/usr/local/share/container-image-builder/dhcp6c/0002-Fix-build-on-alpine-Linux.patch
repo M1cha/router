@@ -1,4 +1,4 @@
-From 6bc041097a1d27a33d15ba2823c4b8a33130e2a0 Mon Sep 17 00:00:00 2001
+From aa11b647e55d0baa1a1ff16891f56c81245ba119 Mon Sep 17 00:00:00 2001
 From: Michael Zimmermann <sigmaepsilon92@gmail.com>
 Date: Thu, 7 Nov 2024 23:16:59 +0100
 Subject: [PATCH 2/2] Fix build on alpine Linux
@@ -10,10 +10,10 @@ Subject: [PATCH 2/2] Fix build on alpine Linux
  3 files changed, 3 insertions(+)
 
 diff --git a/common.c b/common.c
-index 6c5935f..c1bfc00 100644
+index 34b0257..44ac09f 100644
 --- a/common.c
 +++ b/common.c
-@@ -75,6 +75,7 @@
+@@ -76,6 +76,7 @@
  #include <stdarg.h>
  #include <syslog.h>
  #include <stdlib.h>
@@ -22,10 +22,10 @@ index 6c5935f..c1bfc00 100644
  #include <string.h>
  #include <err.h>
 diff --git a/config.c b/config.c
-index d83446f..546fc38 100644
+index 8dd99e0..8b4a5be 100644
 --- a/config.c
 +++ b/config.c
-@@ -44,6 +44,7 @@
+@@ -45,6 +45,7 @@
  
  #include <syslog.h>
  #include <stdlib.h>
@@ -34,10 +34,10 @@ index d83446f..546fc38 100644
  #include <string.h>
  #include <ifaddrs.h>
 diff --git a/dhcp6c.c b/dhcp6c.c
-index 853ab93..af75c3b 100644
+index e6b7144..31f3f29 100644
 --- a/dhcp6c.c
 +++ b/dhcp6c.c
-@@ -64,6 +64,7 @@
+@@ -67,6 +67,7 @@
  #include <stdarg.h>
  #include <syslog.h>
  #include <stdlib.h>
@@ -46,5 +46,5 @@ index 853ab93..af75c3b 100644
  #include <string.h>
  #include <err.h>
 -- 
-2.47.0
+2.52.0
 

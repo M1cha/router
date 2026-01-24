@@ -1,4 +1,4 @@
-From 831e2c3be78b58e012be95668d5327d88d0e8cb0 Mon Sep 17 00:00:00 2001
+From 37044aa18da8029da98e8f2b654cbcd7f4fdf3d0 Mon Sep 17 00:00:00 2001
 From: Michael Zimmermann <sigmaepsilon92@gmail.com>
 Date: Thu, 7 Nov 2024 22:54:56 +0100
 Subject: [PATCH 1/2] Fix building on Linux
@@ -10,42 +10,42 @@ Subject: [PATCH 1/2] Fix building on Linux
  3 files changed, 4 insertions(+)
 
 diff --git a/addrconf.c b/addrconf.c
-index aecc41e..e3c3c40 100644
+index 01efc1c..e70c657 100644
 --- a/addrconf.c
 +++ b/addrconf.c
-@@ -52,6 +52,7 @@
- #include <stdio.h>
+@@ -53,6 +53,7 @@
  #include <stdlib.h>
  #include <unistd.h>
+ #include <inttypes.h>
 +#include <time.h>
  
  #include "dhcp6.h"
  #include "config.h"
 diff --git a/dhcp6c.c b/dhcp6c.c
-index b86e918..0da3c8a 100644
+index 821ad03..e6b7144 100644
 --- a/dhcp6c.c
 +++ b/dhcp6c.c
-@@ -27,6 +27,8 @@
-  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+@@ -29,6 +29,8 @@
   * SUCH DAMAGE.
   */
+ 
 +#define _GNU_SOURCE
 +#include <sys/file.h>
  #include <sys/types.h>
  #include <sys/param.h>
  #include <sys/socket.h>
 diff --git a/prefixconf.c b/prefixconf.c
-index 114cbac..ac9b508 100644
+index d42c241..22ed2fa 100644
 --- a/prefixconf.c
 +++ b/prefixconf.c
-@@ -52,6 +52,7 @@
- #include <stdio.h>
+@@ -54,6 +54,7 @@
  #include <stdlib.h>
  #include <unistd.h>
+ #include <inttypes.h>
 +#include <time.h>
  
  #include "dhcp6.h"
  #include "config.h"
 -- 
-2.49.0
+2.52.0
 
