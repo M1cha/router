@@ -27,6 +27,7 @@ $TTL 3600       ; Default Time to Live for resource records (1 hour)
 use-application-dns.net CNAME .
 *.use-application-dns.net CNAME .
 """
+allowed_domains = []
 
 
 def block_domain(zonefile, domain):
@@ -48,6 +49,8 @@ def load_hostfile(zonefile, url):
             address = parts[0].strip().decode()
             domain = parts[1].strip().decode()
 
+            if domain in allowed_domains:
+                continue
             if address != "0.0.0.0":
                 continue
             if domain == "0.0.0.0":
@@ -58,6 +61,14 @@ def load_hostfile(zonefile, url):
 
 
 def main():
+    with open("/run/media/config/allowlist.txt", "r") as f:
+        for line in f:
+            line = line.split("#")[0].strip()
+            if line == "":
+                continue
+
+            allowed_domains.append(line)
+
     with open("/run/media/rpz/rpz.db.tmp", "w") as zonefile:
         zonefile.write(zonefile_header)
 
