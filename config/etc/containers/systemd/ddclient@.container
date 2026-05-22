@@ -5,7 +5,7 @@ After=network.target
 [Container]
 ContainerName=ddclient-%I
 Image=localhost/ddclient:latest
-Label=io.containers.autoupdate=local
+AutoUpdate=local
 Volume=/usr/local/share/ddclient/ddclient-%I.conf:/etc/ddclient/ddclient.conf:ro,idmap,z
 Volume=/run/dhcp6c-addresses:/run/dhcp6c-addresses:ro,idmap,z
 Exec=ddclient -foreground
