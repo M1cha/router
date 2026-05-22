@@ -19,26 +19,6 @@ tmp2sys() {
 	fi
 }
 
-# Source: https://stackoverflow.com/a/29613573
-escape_sed_replacement() {
-	sed 's/[&/\]/\\&/g' <<< "$1"
-}
-
-replace_template() {
-	local template="$1"
-	local replacement="$2"
-	local file="$3"
-	local replacement_escaped
-
-	replacement_escaped=$(escape_sed_replacement "$replacement")
-
-	sed -i "s/{{ $template }}/$replacement_escaped/g" "$file"
-}
-
-secret_value() {
-	podman secret inspect --showsecret "$1" -f '{{ .SecretData }}'
-}
-
 cleanup_systemd() {
 	# Remove our old service files
 	find /etc/systemd/system -mindepth 1 -maxdepth 1 -print0 |
@@ -72,11 +52,6 @@ cleanup_systemd() {
 
 install() {
 	cd "$HOME/tmp_config"
-
-	replace_template wan_username "$(secret_value wan_username)" \
-		usr/local/share/ppp/peers/modem
-	replace_template wan_password "$(secret_value wan_password)" \
-		usr/local/share/ppp/peers/modem
 
 	tmp2sys etc/hostname
 	tmp2sys etc/sysctl.d/30-router.conf

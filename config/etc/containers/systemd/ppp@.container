@@ -9,7 +9,7 @@ Before=ddclient@ipv4.service jool@internet.service jool@parents.service
 ContainerName=ppp-%I
 Image=localhost/ppp:latest
 AutoUpdate=local
-Volume=/usr/local/share/ppp/peers:/etc/ppp/peers:ro,idmap,z
+Volume=/run/ppp/peers/modem:/etc/ppp/peers/modem:ro,idmap,z
 Exec=pppd call %I nodetach up_sdnotify
 Network=host
 AddCapability=NET_ADMIN,NET_RAW
@@ -19,4 +19,9 @@ AddDevice=/dev/ppp
 [Service]
 Restart=always
 RestartSec=10
+ExecStartPre=process-secret-template \
+	/usr/local/share/ppp/peers/modem \
+	/run/ppp/peers/modem \
+	wan_username \
+	wan_password
 ExecStartPost=sysctl -w net.ipv6.conf.ppp0.accept_ra=2
