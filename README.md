@@ -53,3 +53,27 @@ update-ca-trust
 ```bash
 ./update
 ```
+
+## Manual Updates
+
+### Base image update
+
+These container images are built and updated locally. They need an update to
+their base image version to receive major package updates.
+
+- dhcp6c
+- dnsmasq
+- jool
+- ppp
+- radvd
+- scapy
+
+### Manual image version change
+
+These containers pin a version in the container file and auto update from the
+registry. This allows receiving security updates without causing breaking
+changes.
+
+- bind-exporter
+- named
+- named-refresh-adblock-list
