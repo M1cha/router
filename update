@@ -32,7 +32,7 @@ class Target:
         subprocess.run(args, check=True)
 
     def run_script(self, file):
-        with open("script.sh", "rb") as f:
+        with open(file, "rb") as f:
             script = f.read()
 
         p = subprocess.run(["ssh", f"{self.user}@{self.host}", script], check=True)
